@@ -890,13 +890,16 @@
         let fetchPath = filePath;
         
         if (isGitHubPages) {
-          // On GitHub Pages, need to include the repository path
-          const pathArray = window.location.pathname.split('/').filter(p => p);
-          if (pathArray.length > 0) {
-            // pathArray[0] is the repo name (if not root)
-            // Prepend it to the file path
-            fetchPath = '/' + pathArray.join('/').split('/').slice(0, -1).join('/') + '/' + filePath;
-            fetchPath = fetchPath.replace(/\/+/g, '/'); // Clean up multiple slashes
+          // On GitHub Pages: https://username.github.io/NoContext-Atlas/
+          // Extract repository name from pathname
+          const pathname = window.location.pathname;
+          console.log('Current pathname:', pathname);
+          
+          // Get the repo name (second part of path after domain)
+          const pathParts = pathname.split('/').filter(p => p);
+          if (pathParts.length > 0) {
+            const repoName = pathParts[0]; // e.g., 'NoContext-Atlas'
+            fetchPath = '/' + repoName + '/' + filePath;
           }
         }
         
