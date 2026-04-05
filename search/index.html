@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoContext Atlas - Knowledge Base Search</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.95;
+    }
+
+    .search-section {
+      padding: 30px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .search-wrapper {
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1em;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-input::placeholder {
+      color: #999;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 0.9em;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .filter-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      font-size: 0.95em;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding-top: 15px;
+      border-top: 1px solid #e0e0e0;
+      margin-top: 15px;
+    }
+
+    .stat-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.95em;
+    }
+
+    .stat-label {
+      color: #666;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      color: #667eea;
+      font-weight: 700;
+      font-size: 1.1em;
+    }
+
+    .results-section {
+      padding: 30px;
+    }
+
+    .results-header {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .results-header h2 {
+      font-size: 1.3em;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .result-item {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 18px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .result-item:hover {
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      transform: translateX(4px);
+      background: #f0f2ff;
+    }
+
+    .result-title {
+      font-size: 1.1em;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .result-title a {
+      color: #667eea;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .result-title a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    .result-path {
+      font-size: 0.85em;
+      color: #999;
+      margin-bottom: 8px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .result-snippet {
+      font-size: 0.95em;
+      color: #555;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .highlight {
+      background-color: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: 600;
+      color: #856404;
+    }
+
+    .result-meta {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 0.85em;
+    }
+
+    .result-category {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .result-matches {
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .empty-state-icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+      font-size: 1.3em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      font-size: 1em;
+      color: #999;
+    }
+
+    .footer {
+      background: #f8f9fa;
+      padding: 20px 30px;
+      text-align: center;
+      font-size: 0.9em;
+      color: #666;
+      border-top: 1px solid #e9ecef;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .filter-row {
+        flex-direction: column;
+      }
+
+      .filter-group {
+        min-width: 100%;
+      }
+
+      .stats {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .result-meta {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 NoContext Atlas</h1>
+      <p>Centralized Knowledge Base Search</p>
+    </div>
+
+    <div class="search-section">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search by title, content, or keywords... e.g., 'sensor offline', 'nginx setup'"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="categoryFilter">Category</label>
+          <select id="categoryFilter" class="filter-select">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="projectFilter">Project</label>
+          <select id="projectFilter" class="filter-select">
+            <option value="">All Projects</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label">Total Articles:</span>
+          <span class="stat-value" id="totalArticles">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Results Found:</span>
+          <span class="stat-value" id="resultsCount">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-section">
+      <div id="resultsContainer"></div>
+    </div>
+
+    <div class="footer">
+      <p>🏢 NoContext IT Operations | Powered by Atlas Search Engine</p>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Knowledge Base Search Engine
+     * Minimal, lightweight, and fully client-side
+     */
+
+    class KBSearch {
+      constructor() {
+        this.index = [];
+        this.filteredIndex = [];
+        this.categories = new Set();
+        this.projects = new Set();
+        this.init();
+      }
+
+      async init() {
+        try {
+          const response = await fetch('./index.json');
+          if (!response.ok) {
+            throw new Error(`Failed to load index: ${response.status}`);
+          }
+          this.index = await response.json();
+          this.buildIndex();
+          this.setupEventListeners();
+          this.render();
+        } catch (error) {
+          console.error('Error loading search index:', error);
+          this.showError(`Failed to load search index: ${error.message}`);
+        }
+      }
+
+      buildIndex() {
+        // Extract unique categories and projects from file paths
+        for (const item of this.index) {
+          const parts = item.url.split('/');
+          
+          // Extract category (usually the folder before filename)
+          if (parts.length > 1) {
+            const category = parts[parts.length - 2];
+            this.categories.add(category);
+          }
+
+          // Extract project (usually the first folder)
+          if (parts.length > 1) {
+            const project = parts[0];
+            this.projects.add(project);
+          }
+        }
+
+        this.populateFilters();
+      }
+
+      populateFilters() {
+        const categorySelect = document.getElementById('categoryFilter');
+        const projectSelect = document.getElementById('projectFilter');
+
+        // Add categories
+        Array.from(this.categories)
+          .sort()
+          .forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = this.formatName(cat);
+            categorySelect.appendChild(option);
+          });
+
+        // Add projects
+        Array.from(this.projects)
+          .sort()
+          .forEach(proj => {
+            const option = document.createElement('option');
+            option.value = proj;
+            option.textContent = this.formatName(proj);
+            projectSelect.appendChild(option);
+          });
+
+        document.getElementById('totalArticles').textContent = this.index.length;
+      }
+
+      setupEventListeners() {
+        document.getElementById('searchInput').addEventListener('input', () => this.search());
+        document.getElementById('categoryFilter').addEventListener('change', () => this.search());
+        document.getElementById('projectFilter').addEventListener('change', () => this.search());
+      }
+
+      search() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        const projectFilter = document.getElementById('projectFilter').value;
+
+        this.filteredIndex = this.index.filter(item => {
+          // Apply category filter
+          if (categoryFilter) {
+            const itemCategory = item.url.split('/')[item.url.split('/').length - 2];
+            if (itemCategory !== categoryFilter) return false;
+          }
+
+          // Apply project filter
+          if (projectFilter) {
+            const itemProject = item.url.split('/')[0];
+            if (itemProject !== projectFilter) return false;
+          }
+
+          // Apply search query
+          if (!query) return true;
+
+          const titleMatch = item.title.toLowerCase().includes(query);
+          const contentMatch = item.content.toLowerCase().includes(query);
+          const keywordsMatch = item.keywords.some(kw => kw.includes(query));
+
+          return titleMatch || contentMatch || keywordsMatch;
+        });
+
+        // Sort by relevance
+        this.filteredIndex.sort((a, b) => this.calculateRelevance(a, query) - this.calculateRelevance(b, query));
+
+        document.getElementById('resultsCount').textContent = this.filteredIndex.length;
+        this.render();
+      }
+
+      calculateRelevance(item, query) {
+        if (!query) return 0;
+
+        let score = 0;
+        const queryLower = query.toLowerCase();
+
+        // Title matches are more relevant
+        if (item.title.toLowerCase().includes(queryLower)) {
+          score += 100;
+        }
+
+        // Count keyword matches
+        score += item.keywords.filter(kw => kw.includes(queryLower)).length * 10;
+
+        // Count content matches
+        const contentMatches = (item.content.toLowerCase().match(new RegExp(queryLower, 'g')) || []).length;
+        score += contentMatches;
+
+        return -score; // Negative for descending sort
+      }
+
+      highlightText(text, query) {
+        if (!query) return text;
+        
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+      }
+
+      formatName(name) {
+        return name
+          .replace(/[-_]/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
+
+      getCategory(url) {
+        const parts = url.split('/');
+        return parts.length > 1 ? parts[parts.length - 2] : 'General';
+      }
+
+      getProject(url) {
+        const parts = url.split('/');
+        return parts.length > 0 ? parts[0] : 'Unknown';
+      }
+
+      render() {
+        const container = document.getElementById('resultsContainer');
+        const query = document.getElementById('searchInput').value.toLowerCase();
+
+        if (this.filteredIndex.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📭</div>
+              <h3>No Results Found</h3>
+              <p>${query ? 'Try different keywords or adjust your filters.' : 'Start typing to search the knowledge base.'}</p>
+            </div>
+          `;
+          return;
+        }
+
+        const resultsHTML = `
+          <div class="results-header">
+            <h2>Search Results</h2>
+          </div>
+          <div class="results-list">
+            ${this.filteredIndex.map(item => this.renderResult(item, query)).join('')}
+          </div>
+        `;
+
+        container.innerHTML = resultsHTML;
+      }
+
+      renderResult(item, query) {
+        const category = this.getCategory(item.url);
+        const project = this.getProject(item.url);
+        const highlightedTitle = this.highlightText(item.title, query);
+        const highlightedContent = this.highlightText(item.content, query);
+        const matchCount = query
+          ? (item.title.toLowerCase().match(new RegExp(query, 'g')) || []).length +
+            (item.content.toLowerCase().match(new RegExp(query, 'g')) || []).length
+          : 0;
+
+        return `
+          <div class="result-item">
+            <div class="result-title">
+              <a href="${item.url}" target="_blank">${highlightedTitle}</a>
+            </div>
+            <div class="result-path">📁 ${item.url}</div>
+            <div class="result-snippet">${highlightedContent}...</div>
+            <div class="result-meta">
+              <span class="result-category">${this.formatName(category)}</span>
+              <span style="color: #999;">Project: <strong>${this.formatName(project)}</strong></span>
+              ${query && matchCount > 0 ? `<span class="result-matches">✓ ${matchCount} match${matchCount > 1 ? 'es' : ''}</span>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      showError(message) {
+        const container = document.getElementById('resultsContainer');
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <h3>Error Loading Search</h3>
+            <p>${message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Initialize search engine when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      new KBSearch();
+    });
+  </script>
+</body>
+</html>
