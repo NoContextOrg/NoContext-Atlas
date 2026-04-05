@@ -338,14 +338,12 @@
       const url = window.location.href;
       
       // If running on GitHub Pages (has github.io in URL)
+      // Format: https://ORG.github.io/REPO/viewer.html
       if (url.includes('github.io')) {
-        // GitHub Pages: https://username.github.io/repo-name/viewer.html
-        // Need to fetch from root of repo
-        return '';
+        return '';  // Fetch from root of deployed site
       } else {
         // Local: http://localhost:8000/viewer.html
-        // Both files are in root, so fetch directly
-        return '';
+        return '';  // Fetch directly from origin
       }
     }
 

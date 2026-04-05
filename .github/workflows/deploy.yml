@@ -38,25 +38,52 @@ jobs:
         with:
           node-version: '18'
 
-      - name: 🔍 Generate search index
-        run: node generate-index.js
-        
-      - name: ✅ Verify index was generated
+      - name: 📂 Prepare deployment directory
         run: |
-          if [ -f index.json ]; then
-            echo "✓ Index generated successfully"
-            wc -l index.json
-          else
-            echo "✗ Index not found!"
+          mkdir -p _site
+          cp index.html _site/
+          cp viewer.html _site/
+          
+          echo "📋 Copying markdown files from project folders..."
+          for project in */; do
+            project_name="${project%/}"
+            if [[ ! "$project_name" =~ ^\. ]] && [[ "$project_name" != "_site" ]] && [[ "$project_name" != ".github" ]]; then
+              echo "  📦 Copying project: $project_name"
+              cp -r "$project_name" "_site/"
+            fi
+          done
+          echo "✅ Files copied to _site/"
+
+      - name: 🔍 Generate search index
+        run: |
+          # Generate index from current directory (scans all markdown files in repo)
+          node generate-index.js
+          # Verify index was generated
+          if [ ! -f index.json ]; then
+            echo "✗ index.json not generated!"
             exit 1
           fi
+          # Copy to _site/ for deployment
+          cp index.json _site/
+          echo "✅ Search index generated and copied to _site/"
 
-      - name: 📋 Commit index changes
+      - name: ✅ Verify deployment contents
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add index.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore: regenerate search index" || true
+          echo "=== Deployment Verification ==="
+          echo "📄 HTML files:"
+          ls -lh _site/*.html 2>/dev/null || echo "  None found"
+          echo "📊 Index file:"
+          ls -lh _site/index.json 2>/dev/null || echo "  Not found!"
+          echo "📝 Sample markdown files:"
+          find _site -name "*.md" -type f | head -5
+          if [ -f _site/index.json ]; then
+            count=$(grep -o '"url"' _site/index.json | wc -l)
+            echo "✓ Index contains $count entries"
+            [ $count -gt 0 ] || exit 1
+          else
+            echo "✗ index.json not found!"
+            exit 1
+          fi
 
       - name: 📤 Setup Pages
         uses: actions/configure-pages@v4
@@ -64,7 +91,7 @@ jobs:
       - name: 🚀 Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
       - name: 🌐 Deploy to GitHub Pages
         id: deployment
@@ -73,8 +100,8 @@ jobs:
       - name: 📊 Log deployment info
         run: |
           echo "=== Deployment Summary ==="
-          echo "Repository: ${{ github.repository }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
-          echo "Pages URL: ${{ steps.deployment.outputs.page_url }}"
-          echo "================================"
+          echo "✓ Repository: ${{ github.repository }}"
+          echo "✓ Branch: ${{ github.ref_name }}"
+          echo "✓ Pages URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "📍 Deployed: index.html, viewer.html, index.json, project folders"
+          echo "🔗 Visit: ${{ steps.deployment.outputs.page_url }}"

@@ -22,7 +22,7 @@ const path = require('path');
 
 // Configuration
 const ROOT_DIR = process.argv[2] || process.cwd();
-const OUTPUT_DIR = ROOT_DIR;  // Output to root instead of search/
+const OUTPUT_DIR = ROOT_DIR;  // Output to root directory
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'index.json');
 
 // Ensure output directory exists
