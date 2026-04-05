@@ -885,8 +885,22 @@
       document.getElementById('modalDownload').href = filePath;
 
       try {
-        // Fetch from root (works on both local and GitHub Pages)
-        const fetchPath = filePath;
+        // Determine the correct base path for fetching
+        const isGitHubPages = window.location.href.includes('github.io');
+        let fetchPath = filePath;
+        
+        if (isGitHubPages) {
+          // On GitHub Pages, need to include the repository path
+          const pathArray = window.location.pathname.split('/').filter(p => p);
+          if (pathArray.length > 0) {
+            // pathArray[0] is the repo name (if not root)
+            // Prepend it to the file path
+            fetchPath = '/' + pathArray.join('/').split('/').slice(0, -1).join('/') + '/' + filePath;
+            fetchPath = fetchPath.replace(/\/+/g, '/'); // Clean up multiple slashes
+          }
+        }
+        
+        console.log('Environment:', isGitHubPages ? 'GitHub Pages' : 'Local');
         console.log('Fetching:', fetchPath);
         
         const response = await fetch(fetchPath);
@@ -901,7 +915,8 @@
         console.error('Error loading markdown:', error);
         contentDiv.innerHTML = `<div style="color: red; padding: 20px;">
           <strong>Error loading file:</strong> ${error.message}<br><br>
-          <small>Tried to fetch: ${filePath}</small>
+          <small>Tried to fetch: ${filePath}</small><br>
+          <small>Environment: ${window.location.href.includes('github.io') ? 'GitHub Pages' : 'Local'}</small>
         </div>`;
       }
     }
