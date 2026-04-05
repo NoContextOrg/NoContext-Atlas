@@ -6,7 +6,8 @@ on:
     paths:
       - '**.md'
       - 'generate-index.js'
-      - 'search/**'
+      - 'index.html'
+      - 'viewer.html'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -43,9 +44,9 @@ jobs:
         
       - name: ✅ Verify index was generated
         run: |
-          if [ -f search/index.json ]; then
+          if [ -f index.json ]; then
             echo "✓ Index generated successfully"
-            wc -l search/index.json
+            wc -l index.json
           else
             echo "✗ Index not found!"
             exit 1
@@ -55,7 +56,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add search/index.json
+          git add index.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: regenerate search index" && echo "INDEX_UPDATED=true" >> $GITHUB_ENV)
 
       - name: 📤 Push changes
