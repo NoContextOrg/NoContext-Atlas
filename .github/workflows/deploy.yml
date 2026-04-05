@@ -56,16 +56,9 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add index.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: regenerate search index" && echo "INDEX_UPDATED=true" >> $GITHUB_ENV)
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: regenerate search index" || true
 
-      - name: 📤 Push changes
-        if: env.INDEX_UPDATED == 'true'
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-
-      - name: 📦 Setup Pages
+      - name: 📤 Setup Pages
         uses: actions/configure-pages@v4
 
       - name: 🚀 Upload artifact
