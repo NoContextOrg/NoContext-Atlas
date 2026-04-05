@@ -423,7 +423,8 @@
         viewerBody.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         viewerTitle.textContent = '📄 Loading...';
 
-        const fetchPath = `../${filePath}`;
+        // Fetch from root (works on both local and GitHub Pages)
+        const fetchPath = `${filePath}`;
         console.log('Fetching:', fetchPath);
 
         const response = await fetch(fetchPath);
@@ -438,13 +439,19 @@
         viewerTitle.textContent = '📄 ' + title;
         viewerPath.textContent = '📁 ' + filePath;
         
+        // Set raw link
+        const downloadLink = document.getElementById('modalDownload');
+        if (downloadLink) {
+          downloadLink.href = filePath;
+        }
+        
         viewerBody.innerHTML = `<div class="markdown-content">${html}</div>`;
       } catch (error) {
         console.error('Error loading markdown:', error);
         viewerBody.innerHTML = `
           <div class="error">
             <strong>Error loading file:</strong> ${error.message}<br><br>
-            <small>Path: ../${filePath}</small>
+            <small>Path: ${filePath}</small>
           </div>
         `;
         viewerTitle.textContent = '⚠️ Error';

@@ -880,10 +880,10 @@
       contentDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="spinner"></div></div>';
       document.getElementById('modalTitle').textContent = title;
       document.getElementById('modalPath').textContent = `📁 ${filePath}`;
-      document.getElementById('modalDownload').href = `../${filePath}`;
+      document.getElementById('modalDownload').href = filePath;
 
       try {
-        const fetchPath = `../${filePath}`;
+        const fetchPath = filePath;
         console.log('Fetching:', fetchPath);
         
         const response = await fetch(fetchPath);
@@ -898,7 +898,7 @@
         console.error('Error loading markdown:', error);
         contentDiv.innerHTML = `<div style="color: red; padding: 20px;">
           <strong>Error loading file:</strong> ${error.message}<br><br>
-          <small>Tried to fetch: ../${filePath}</small>
+          <small>Tried to fetch: ${filePath}</small>
         </div>`;
       }
     }
