@@ -867,6 +867,19 @@
     }
 
     /**
+     * Get repository base URL
+     */
+    function getRepoBase() {
+      const { origin, pathname } = window.location;
+
+      // Extract repo name (first path segment)
+      const parts = pathname.split('/').filter(Boolean);
+      const repo = parts.length > 0 ? `/${parts[0]}` : '';
+
+      return origin + repo;
+    }
+
+    /**
      * Markdown Viewer Functions
      */
     async function openMarkdownViewer(filePath, title) {
@@ -885,15 +898,10 @@
       document.getElementById('modalDownload').href = filePath;
 
       try {
-        // Get the base URL of the current page
-        const currentUrl = new URL(window.location.href);
-        const baseUrl = currentUrl.origin + currentUrl.pathname.substring(0, currentUrl.pathname.lastIndexOf('/'));
-        
-        // Construct full URL for the file
-        const fileUrl = baseUrl + '/' + filePath;
+        const fileUrl = `${getRepoBase()}/${filePath}`;
         
         console.log('Environment:', window.location.href.includes('github.io') ? 'GitHub Pages' : 'Local');
-        console.log('Base URL:', baseUrl);
+        console.log('Repo Base:', getRepoBase());
         console.log('Fetching:', fileUrl);
         
         const response = await fetch(fileUrl);
