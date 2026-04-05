@@ -885,22 +885,18 @@
       document.getElementById('modalDownload').href = filePath;
 
       try {
-        // Build the correct fetch path for both local and GitHub Pages
-        let fetchPath = filePath;
+        // Get the base URL of the current page
+        const currentUrl = new URL(window.location.href);
+        const baseUrl = currentUrl.origin + currentUrl.pathname.substring(0, currentUrl.pathname.lastIndexOf('/'));
         
-        // On GitHub Pages, we need to prepend the repo name
-        if (window.location.href.includes('github.io')) {
-          const pathArray = window.location.pathname.split('/').filter(p => p);
-          if (pathArray.length > 0) {
-            const repoName = pathArray[0];
-            fetchPath = `/${repoName}/${filePath}`;
-          }
-        }
+        // Construct full URL for the file
+        const fileUrl = baseUrl + '/' + filePath;
         
         console.log('Environment:', window.location.href.includes('github.io') ? 'GitHub Pages' : 'Local');
-        console.log('Fetching:', fetchPath);
+        console.log('Base URL:', baseUrl);
+        console.log('Fetching:', fileUrl);
         
-        const response = await fetch(fetchPath);
+        const response = await fetch(fileUrl);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: Failed to load file`);
         }
