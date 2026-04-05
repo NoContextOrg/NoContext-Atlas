@@ -647,7 +647,7 @@
 
       async init() {
         try {
-          const response = await fetch('../index.json');
+          const response = await fetch('./index.json');
           if (!response.ok) {
             throw new Error(`Failed to load index: ${response.status}`);
           }

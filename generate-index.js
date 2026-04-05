@@ -10,7 +10,7 @@
  *   node generate-index.js /path/to/root      # Scans from specified directory
  * 
  * OUTPUT:
- *   search/index.json - JSON file with indexed content
+ *   index.json - JSON file with indexed content (in root directory)
  * 
  * REQUIREMENTS:
  *   - Node.js 12+
@@ -22,7 +22,7 @@ const path = require('path');
 
 // Configuration
 const ROOT_DIR = process.argv[2] || process.cwd();
-const OUTPUT_DIR = path.join(ROOT_DIR, 'search');
+const OUTPUT_DIR = ROOT_DIR;  // Output to root instead of search/
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'index.json');
 
 // Ensure output directory exists
