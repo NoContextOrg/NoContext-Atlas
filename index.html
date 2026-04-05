@@ -838,11 +838,8 @@
             (item.content.toLowerCase().match(new RegExp(query, 'g')) || []).length
           : 0;
 
-        // Create encoded URL for the viewer
-        const viewerUrl = `./viewer.html?file=${encodeURIComponent(item.url)}`;
-
         return `
-          <div class="result-item" onclick="window.open('${viewerUrl}', '_blank'); return false;">
+          <div class="result-item" onclick="openMarkdownViewer('${item.url}', '${item.title.replace(/'/g, "\\'")}'); return false;">
             <div class="result-title">
               ${highlightedTitle}
             </div>
@@ -870,11 +867,43 @@
     }
 
     /**
-     * Markdown Viewer Functions - Not used (opens in new tab via viewer.html)
+     * Markdown Viewer Functions
      */
     async function openMarkdownViewer(filePath, title) {
-      // This function is deprecated - clicking results opens in new tab via viewer.html
-      console.log('Opening viewer for:', filePath);
+      const modal = document.getElementById('markdownModal');
+      const contentDiv = document.getElementById('markdownContent');
+      
+      if (!modal || !contentDiv) {
+        console.error('Modal elements not found');
+        return;
+      }
+      
+      modal.classList.add('active');
+      contentDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="spinner"></div></div>';
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalPath').textContent = `📁 ${filePath}`;
+      document.getElementById('modalDownload').href = filePath;
+
+      try {
+        // Fetch from root (works on both local and GitHub Pages)
+        const fetchPath = filePath;
+        console.log('Fetching:', fetchPath);
+        
+        const response = await fetch(fetchPath);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Failed to load file`);
+        }
+        
+        const markdown = await response.text();
+        const html = convertMarkdownToHtml(markdown);
+        contentDiv.innerHTML = html;
+      } catch (error) {
+        console.error('Error loading markdown:', error);
+        contentDiv.innerHTML = `<div style="color: red; padding: 20px;">
+          <strong>Error loading file:</strong> ${error.message}<br><br>
+          <small>Tried to fetch: ${filePath}</small>
+        </div>`;
+      }
     }
 
     function closeMarkdownViewer() {
