@@ -647,7 +647,12 @@
 
       async init() {
         try {
-          const response = await fetch('./index.json');
+          // Detect environment and adjust path
+          const isGitHubPages = window.location.href.includes('github.io');
+          const indexPath = isGitHubPages ? './index.json' : './index.json';
+          console.log('Loading from:', indexPath, '(', isGitHubPages ? 'GitHub Pages' : 'Local', ')');
+          
+          const response = await fetch(indexPath);
           if (!response.ok) {
             throw new Error(`Failed to load index: ${response.status}`);
           }
@@ -865,42 +870,11 @@
     }
 
     /**
-     * Markdown Viewer Functions
+     * Markdown Viewer Functions - Not used (opens in new tab via viewer.html)
      */
     async function openMarkdownViewer(filePath, title) {
-      const modal = document.getElementById('markdownModal');
-      const contentDiv = document.getElementById('markdownContent');
-      
-      if (!modal || !contentDiv) {
-        console.error('Modal elements not found');
-        return;
-      }
-      
-      modal.classList.add('active');
-      contentDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="spinner"></div></div>';
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('modalPath').textContent = `📁 ${filePath}`;
-      document.getElementById('modalDownload').href = filePath;
-
-      try {
-        const fetchPath = filePath;
-        console.log('Fetching:', fetchPath);
-        
-        const response = await fetch(fetchPath);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: Failed to load file`);
-        }
-        
-        const markdown = await response.text();
-        const html = convertMarkdownToHtml(markdown);
-        contentDiv.innerHTML = html;
-      } catch (error) {
-        console.error('Error loading markdown:', error);
-        contentDiv.innerHTML = `<div style="color: red; padding: 20px;">
-          <strong>Error loading file:</strong> ${error.message}<br><br>
-          <small>Tried to fetch: ${filePath}</small>
-        </div>`;
-      }
+      // This function is deprecated - clicking results opens in new tab via viewer.html
+      console.log('Opening viewer for:', filePath);
     }
 
     function closeMarkdownViewer() {

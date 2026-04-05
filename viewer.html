@@ -333,6 +333,22 @@
       return params.get('file');
     }
 
+    // Detect if running on GitHub Pages or locally
+    function getBasePath() {
+      const url = window.location.href;
+      
+      // If running on GitHub Pages (has github.io in URL)
+      if (url.includes('github.io')) {
+        // GitHub Pages: https://username.github.io/repo-name/viewer.html
+        // Need to fetch from root of repo
+        return '';
+      } else {
+        // Local: http://localhost:8000/viewer.html
+        // Both files are in root, so fetch directly
+        return '';
+      }
+    }
+
     // Convert markdown to HTML
     function convertMarkdownToHtml(markdown) {
       let html = markdown;
@@ -423,8 +439,9 @@
         viewerBody.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         viewerTitle.textContent = '📄 Loading...';
 
-        // Fetch from root (works on both local and GitHub Pages)
-        const fetchPath = `${filePath}`;
+        const basePath = getBasePath();
+        const fetchPath = `${basePath}${filePath}`;
+        console.log('Environment:', window.location.href.includes('github.io') ? 'GitHub Pages' : 'Local');
         console.log('Fetching:', fetchPath);
 
         const response = await fetch(fetchPath);
@@ -451,7 +468,8 @@
         viewerBody.innerHTML = `
           <div class="error">
             <strong>Error loading file:</strong> ${error.message}<br><br>
-            <small>Path: ${filePath}</small>
+            <small>Path: ${filePath}</small><br>
+            <small>Environment: ${window.location.href.includes('github.io') ? 'GitHub Pages' : 'Local'}</small>
           </div>
         `;
         viewerTitle.textContent = '⚠️ Error';
