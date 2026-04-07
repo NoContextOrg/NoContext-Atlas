@@ -1,551 +1,315 @@
-# KBAninoHOW0001: Asset Management Using Git Submodules and Git LFS
+# KBAninoHOW0001: Asset Management Using Git Submodules, Sparse Checkout, and Git LFS
 
 ## Overview
 
-This document provides a formalized guide for managing game assets in the Anino project using **Git submodules** and **Git LFS**. It serves as a knowledge base for developers to efficiently load, update, and maintain game assets across multiple game types (RPG, VR, AR, Web) during local development.
+This document provides a **practical end-to-end flow** for managing game assets in the Anino Visual Novel project using:
 
-The architecture separates the **asset repository**, which is stored in a dedicated repository with Git LFS support, from the main project repository. This allows large binary assets to be managed efficiently while keeping the main project lightweight.
+- **Git submodules** – to link the central asset repository
+- **Sparse checkout** – to pull only needed folders (`web`, `shared`)
+- **Git LFS** – to handle large binary files efficiently
 
-* Asset repository: [https://github.com/NoContextOrg/anino-assets.git](https://github.com/NoContextOrg/anino-assets.git)
-* Main project repository: Contains code and references submodules for assets.
+It replaces older patterns that cloned the entire `anino-assets` repo per game type with a **lean, stable, multi-project friendly workflow**.
 
----
-
-## Repository Structure
-
-The `anino-assets` repository is organized to support multiple game types and shared resources:
-
-```
-anino-assets/
-├─ ar/           # Assets specific to AR games
-├─ rpg/          # Assets specific to RPG games
-├─ vr/           # Assets specific to VR games
-├─ web/          # Assets specific to Web games
-├─ shared/       # Assets shared across all game types
-├─ metadata/     # Metadata describing assets
-├─ .github/
-│  └─ workflows/ # CI/CD automation workflows
-├─ LICENSE
-└─ README.md
-```
-
-**Key Notes:**
-
-* Game-specific folders (`ar`, `rpg`, `vr`, `web`) allow selective submodule inclusion.
-* `shared/` contains common assets utilized by multiple game types.
-* `metadata/` provides descriptive information for asset management.
-* `.github/workflows/` contains GitHub Actions for automated validation and releases.
-* Git LFS is used to store large files efficiently (e.g., `.png`, `.wav`, `.ogg`, `.psd`).
+- Asset repository: https://github.com/NoContextOrg/anino-assets.git
+- Game repository: https://github.com/NoContextOrg/anino-visual-novel.git
 
 ---
 
-## 1. Adding Assets as a Submodule
+## 1️⃣ Prerequisites
 
-To integrate assets into a local game project, follow these steps:
+Install the following on your development machine.
 
-1. Navigate to the project root:
+### Git
 
 ```bash
-cd /path/to/your/game-project
+# Arch Linux / EndeavourOS
+sudo pacman -S git
+
+# Ubuntu / Debian
+sudo apt install git -y
 ```
 
-2. Add the submodule pointing to the asset repository, specifying only the necessary folder for your game type:
+### Git LFS
 
 ```bash
-git submodule add -b main --depth 1 https://github.com/NoContextOrg/anino-assets.git assets/rpg
+# Arch Linux / EndeavourOS
+sudo pacman -S git-lfs
+
+git lfs install
 ```
 
-**Parameters Explained:**
+(For other platforms, follow https://git-lfs.github.com/)
 
-* `-b main` – Ensures the submodule tracks the `main` branch.
-* `--depth 1` – Performs a shallow clone to reduce local storage usage.
-* `assets/rpg` – Local path in the project where the submodule will reside.
+### Godot 4.x
 
-> Repeat for additional game types as required, e.g., `assets/vr` for VR projects.
-
-> All large assets in this repository are stored with Git LFS for performance and storage efficiency.
+Install **Godot 4.x** matching the version required by `project.godot` in the game repo.
 
 ---
 
-## 2. Updating Submodules
+## 2️⃣ Clone Game Repo with Submodules
 
-To synchronize your submodules with the latest changes in the asset repository:
+Clone the game repository and initialize submodules in one step:
 
 ```bash
-git submodule update --remote --merge
+git clone --recurse-submodules https://github.com/NoContextOrg/anino-visual-novel.git
+cd anino-visual-novel
 ```
 
-**Explanation:**
+This ensures the `assets` submodule is initialized automatically if already configured in the repo.
 
-* Fetches the latest commits from the remote submodule repository.
-* `--merge` merges changes into the local submodule without overwriting existing work.
-
-> Recommended to run this periodically to ensure local projects are up-to-date with shared assets.
-
-> Ensure Git LFS is installed to correctly fetch large binary files.
+> If the repo was cloned previously without `--recurse-submodules`, run:
+>
+> ```bash
+> git submodule update --init --recursive
+> ```
 
 ---
 
-## 3. Loading Assets in the Game
+## 3️⃣ Add Assets Repo as a Submodule (If Not Already Present)
 
-Assets should be referenced relative to the submodule path in the project. Examples per game type:
-
-### RPG Game Example
-
-```
-game-project/
-├─ assets/rpg/characters/
-├─ assets/rpg/environment/
-```
-
-```gdscript
-# Godot example
-var character_texture = load("res://assets/rpg/characters/hero.png")
-```
-
-### VR, AR, and Web Games
-
-Similarly, mount and reference assets from the respective submodule folders:
-
-```
-assets/vr/... 
-assets/ar/... 
-assets/web/...
-```
-
-```gdscript
-var vr_environment = load("res://assets/vr/scene1/environment.tscn")
-```
-
-> Developers should maintain consistent folder structure to simplify asset referencing.
-
----
-
-## 4. CI/CD Automation with GitHub Actions
-
-The asset repository includes automated workflows to ensure asset integrity and manage releases. These workflows are defined in `.github/workflows/`.
-
-### 4.1 Assets CI Workflow (`assets-ci.yml`)
-
-**Purpose:** Validates asset repository integrity on every push and pull request to `main`.
-
-**Triggers:**
-* Push to `main` branch
-* Pull requests targeting `main` branch
-
-**Validation Steps:**
-1. Checks out repository with Git LFS enabled
-2. Runs `git lfs install` and `git lfs pull` to fetch all large binary files
-3. Validates that all required folders exist:
-   - `ar/`, `rpg/`, `vr/`, `web/`, `shared/`, `metadata/`
-   - Fails if any folder is missing
-4. Scans for files larger than 5MB that are NOT tracked by Git LFS
-   - Large untracked files indicate misconfiguration and cause workflow failure
-5. Generates an `asset-manifest.txt` listing all repository files with timestamps
-6. Uploads manifest as a workflow artifact for auditing
-
-**Branch Protection Requirements:**
-```
-- Require pull request reviews (1 approval minimum)
-- Require this CI workflow to pass before merging
-- Require conversation resolution before merging
-- Restrict who can push to matching branches
-- Do not allow bypassing above settings
-- Disable force push and deletion
-```
-
-### 4.2 Release Workflow (`release.yml`)
-
-**Purpose:** Creates GitHub Releases and publishes asset manifests on version tags or manual trigger.
-
-**Triggers:**
-* Tags matching `v*` pattern (e.g., `v1.0.0`, `v1.1.0-beta`)
-* Manual trigger via `workflow_dispatch`
-
-**Release Steps:**
-1. Checks out repository with Git LFS at tagged commit
-2. Validates tag follows semantic versioning (`v*.*.*`)
-3. Generates `asset-manifest.txt` including:
-   - Release tag and commit SHA
-   - Complete file listing with sizes
-   - Generation timestamp
-4. Creates GitHub Release with:
-   - Auto-generated release notes
-   - Asset manifest attached as release asset
-   - Automatic prerelease detection (tags with `-` suffix)
-5. Provides release summary with direct link to GitHub
-
-**Workflow Dispatch Parameters:**
-- `tag_name` (optional): Manually specify release tag name
-
-**Branch Protection Requirements:**
-Same as Assets CI workflow to ensure only validated code reaches production tags.
-
-### 4.3 Asset Manifest
-
-The `asset-manifest.txt` file is generated by both CI and Release workflows. It serves as:
-* An audit trail of repository contents at specific points in time
-* Documentation for consuming projects tracking submodule versions
-* A checksum-like validation artifact (though not cryptographically signed)
-
-**Manifest Contents:**
-```
-# Asset Manifest
-# Generated: 2026-04-06 14:30:00 UTC
-# Repository: NoContextOrg/anino-assets
-# Commit: abc1234567890...
-
-## Directory Structure
-ar/
-ar/audio/
-ar/models/
-...
-
-## File Listing
-ar/audio/ambient.ogg (2048576 bytes)
-...
-```
-
----
-
-## 5. Best Practices
-
-1. **Minimal Submodule Inclusion:** Only clone the folders required for the current game type to optimize project size.
-2. **Shared Assets Management:** Include the `shared/` folder when multiple game types depend on common assets.
-3. **Submodule Editing:** Avoid making direct changes in submodules. Update the central asset repository and propagate updates.
-4. **Git LFS Awareness:** Ensure all team members have Git LFS installed to handle large binary files correctly.
-5. **Git Ignore Local Files:** Exclude any local caches or generated files from the submodule using `.gitignore`.
-6. **Version Pinning:** Consider pinning submodules to a specific commit for stable builds.
-7. **CI/CD Trust:** Always ensure the Assets CI workflow passes before merging to `main`.
-8. **Release Tagging:** Use semantic versioning for all release tags to maintain clarity on asset versions.
-9. **Artifact Retention:** Asset manifests are retained for 30 days; download them if long-term records are needed.
-
----
-
-## 6. Troubleshooting
-
-### Large Files Not Tracked by Git LFS
-
-If the Assets CI workflow fails with "untracked large files" error:
-
-1. Verify `.gitattributes` includes patterns for your file types
-2. Remove the file from Git history:
-   ```bash
-   git rm --cached <large-file>
-   git add .gitattributes
-   git commit -m "Configure Git LFS for <file-type>"
-   ```
-3. Re-add the file (will now be tracked by LFS)
-
-### Missing Required Folders
-
-If workflow fails due to missing folders:
-
-1. Ensure all folders (`ar/`, `rpg/`, `vr/`, `web/`, `shared/`, `metadata/`) exist at repository root
-2. Create placeholder files if folders are empty:
-   ```bash
-   touch ar/.gitkeep
-   touch rpg/.gitkeep
-   touch vr/.gitkeep
-   touch web/.gitkeep
-   touch shared/.gitkeep
-   touch metadata/.gitkeep
-   ```
-
-### Git LFS Not Pulling Files
-
-If LFS files appear as pointers (not actual content):
-
-1. Ensure Git LFS is installed: `git lfs install`
-2. Pull LFS files: `git lfs pull`
-3. Verify LFS tracking: `git lfs ls-files`
-
----
-
-## 7. References
-
-* [Git Submodules Documentation](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
-* [Git LFS Documentation](https://git-lfs.github.com/)
-* [GitHub Actions Documentation](https://docs.github.com/en/actions)
-* [Semantic Versioning](https://semver.org/)
-* Anino Asset Repository: [https://github.com/NoContextOrg/anino-assets.git](https://github.com/NoContextOrg/anino-assets.git)
-
----
-
-*End of KBAninoHOW0001*
-
-Last Updated: April 6, 2026
-# KBAninoHOW0001: Asset Management Using Git Submodules and Git LFS
-
-## Overview
-
-This document provides a formalized guide for managing game assets in the Anino project using **Git submodules** and **Git LFS**. It serves as a knowledge base for developers to efficiently load, update, and maintain game assets across multiple game types (RPG, VR, AR, Web) during local development.
-
-The architecture separates the **asset repository**, which is stored in a dedicated repository with Git LFS support, from the main project repository. This allows large binary assets to be managed efficiently while keeping the main project lightweight.
-
-* Asset repository: [https://github.com/NoContextOrg/anino-assets.git](https://github.com/NoContextOrg/anino-assets.git)
-* Main project repository: Contains code and references submodules for assets.
-
----
-
-## Repository Structure
-
-The `anino-assets` repository is organized to support multiple game types and shared resources:
-
-```
-anino-assets/
-├─ ar/           # Assets specific to AR games
-├─ rpg/          # Assets specific to RPG games
-├─ vr/           # Assets specific to VR games
-├─ web/          # Assets specific to Web games
-├─ shared/       # Assets shared across all game types
-├─ metadata/     # Metadata describing assets
-├─ .github/
-│  └─ workflows/ # CI/CD automation workflows
-├─ LICENSE
-└─ README.md
-```
-
-**Key Notes:**
-
-* Game-specific folders (`ar`, `rpg`, `vr`, `web`) allow selective submodule inclusion.
-* `shared/` contains common assets utilized by multiple game types.
-* `metadata/` provides descriptive information for asset management.
-* `.github/workflows/` contains GitHub Actions for automated validation and releases.
-* Git LFS is used to store large files efficiently (e.g., `.png`, `.wav`, `.ogg`, `.psd`).
-
----
-
-## 1. Adding Assets as a Submodule
-
-To integrate assets into a local game project, follow these steps:
-
-1. Navigate to the project root:
+If the `assets/` folder is **not yet configured** as a submodule in the game repository:
 
 ```bash
-cd /path/to/your/game-project
+git submodule add https://github.com/NoContextOrg/anino-assets.git assets
 ```
 
-2. Add the submodule pointing to the asset repository, specifying only the necessary folder for your game type:
+This makes `assets/` point to the central `anino-assets` repository.
+
+Commit this change in the game repo:
 
 ```bash
-git submodule add -b main --depth 1 https://github.com/NoContextOrg/anino-assets.git assets/rpg
+git add .
+git commit -m "chore(assets): add anino-assets as submodule"
 ```
-
-**Parameters Explained:**
-
-* `-b main` – Ensures the submodule tracks the `main` branch.
-* `--depth 1` – Performs a shallow clone to reduce local storage usage.
-* `assets/rpg` – Local path in the project where the submodule will reside.
-
-> Repeat for additional game types as required, e.g., `assets/vr` for VR projects.
-
-> All large assets in this repository are stored with Git LFS for performance and storage efficiency.
 
 ---
 
-## 2. Updating Submodules
+## 4️⃣ Sparse Checkout – Only Needed Folders
 
-To synchronize your submodules with the latest changes in the asset repository:
+To keep the working copy lightweight, only check out the folders required by the Visual Novel project:
 
 ```bash
-git submodule update --remote --merge
+cd assets
+
+git sparse-checkout init --cone
+git sparse-checkout set web shared
+
+cd ..
 ```
 
-**Explanation:**
+This will:
 
-* Fetches the latest commits from the remote submodule repository.
-* `--merge` merges changes into the local submodule without overwriting existing work.
+- Pull only `/web` and `/shared` from the asset repository
+- Avoid downloading unrelated folders like `ar/`, `rpg/`, `vr/`
 
-> Recommended to run this periodically to ensure local projects are up-to-date with shared assets.
-
-> Ensure Git LFS is installed to correctly fetch large binary files.
+> This is the **recommended setup** for the Anino Visual Novel project.
 
 ---
 
-## 3. Loading Assets in the Game
+## 5️⃣ Install Git LFS Assets
 
-Assets should be referenced relative to the submodule path in the project. Examples per game type:
+After configuring sparse checkout, pull all Git LFS–tracked files:
 
-### RPG Game Example
-
-```
-game-project/
-├─ assets/rpg/characters/
-├─ assets/rpg/environment/
+```bash
+cd assets
+git lfs pull
+cd ..
 ```
 
-```gdscript
-# Godot example
-var character_texture = load("res://assets/rpg/characters/hero.png")
-```
+This ensures textures, audio, and other large binary assets are fully available locally.
 
-### VR, AR, and Web Games
-
-Similarly, mount and reference assets from the respective submodule folders:
-
-```
-assets/vr/... 
-assets/ar/... 
-assets/web/...
-```
-
-```gdscript
-var vr_environment = load("res://assets/vr/scene1/environment.tscn")
-```
-
-> Developers should maintain consistent folder structure to simplify asset referencing.
+> If you see `.gitattributes` entries for file types but only pointer files locally, re-run `git lfs pull`.
 
 ---
 
-## 4. CI/CD Automation with GitHub Actions
+## 6️⃣ Lock Assets to a Stable Version (Optional but Recommended)
 
-The asset repository includes automated workflows to ensure asset integrity and manage releases. These workflows are defined in `.github/workflows/`.
+To prevent breaking changes from upstream assets, lock your game repo to a **specific stable tag** or commit in `anino-assets`.
 
-### 4.1 Assets CI Workflow (`assets-ci.yml`)
+```bash
+cd assets
+git fetch --tags
 
-**Purpose:** Validates asset repository integrity on every push and pull request to `main`.
+git checkout v1.0.0   # Example stable tag
 
-**Triggers:**
-* Push to `main` branch
-* Pull requests targeting `main` branch
-
-**Validation Steps:**
-1. Checks out repository with Git LFS enabled
-2. Runs `git lfs install` and `git lfs pull` to fetch all large binary files
-3. Validates that all required folders exist:
-   - `ar/`, `rpg/`, `vr/`, `web/`, `shared/`, `metadata/`
-   - Fails if any folder is missing
-4. Scans for files larger than 5MB that are NOT tracked by Git LFS
-   - Large untracked files indicate misconfiguration and cause workflow failure
-5. Generates an `asset-manifest.txt` listing all repository files with timestamps
-6. Uploads manifest as a workflow artifact for auditing
-
-**Branch Protection Requirements:**
-```
-- Require pull request reviews (1 approval minimum)
-- Require this CI workflow to pass before merging
-- Require conversation resolution before merging
-- Restrict who can push to matching branches
-- Do not allow bypassing above settings
-- Disable force push and deletion
+cd ..
+git add assets
+git commit -m "chore(assets): lock assets to v1.0.0"
 ```
 
-### 4.2 Release Workflow (`release.yml`)
+Push to origin:
 
-**Purpose:** Creates GitHub Releases and publishes asset manifests on version tags or manual trigger.
-
-**Triggers:**
-* Tags matching `v*` pattern (e.g., `v1.0.0`, `v1.1.0-beta`)
-* Manual trigger via `workflow_dispatch`
-
-**Release Steps:**
-1. Checks out repository with Git LFS at tagged commit
-2. Validates tag follows semantic versioning (`v*.*.*`)
-3. Generates `asset-manifest.txt` including:
-   - Release tag and commit SHA
-   - Complete file listing with sizes
-   - Generation timestamp
-4. Creates GitHub Release with:
-   - Auto-generated release notes
-   - Asset manifest attached as release asset
-   - Automatic prerelease detection (tags with `-` suffix)
-5. Provides release summary with direct link to GitHub
-
-**Workflow Dispatch Parameters:**
-- `tag_name` (optional): Manually specify release tag name
-
-**Branch Protection Requirements:**
-Same as Assets CI workflow to ensure only validated code reaches production tags.
-
-### 4.3 Asset Manifest
-
-The `asset-manifest.txt` file is generated by both CI and Release workflows. It serves as:
-* An audit trail of repository contents at specific points in time
-* Documentation for consuming projects tracking submodule versions
-* A checksum-like validation artifact (though not cryptographically signed)
-
-**Manifest Contents:**
+```bash
+git push
 ```
-# Asset Manifest
-# Generated: 2026-04-06 14:30:00 UTC
-# Repository: NoContextOrg/anino-assets
-# Commit: abc1234567890...
 
-## Directory Structure
-ar/
-ar/audio/
-ar/models/
-...
+The game repository is now pinned to a stable asset snapshot.
 
-## File Listing
-ar/audio/ambient.ogg (2048576 bytes)
-...
+---
+
+## 7️⃣ Daily Development Workflow
+
+Use this flow when starting work each day.
+
+### Step 1 – Pull Latest Game Code
+
+```bash
+git pull
+```
+
+### Step 2 – Update Submodules
+
+```bash
+git submodule update --init --recursive
+```
+
+### Step 3 – Pull Latest Assets (If Needed)
+
+Only if you want to move to a newer asset snapshot:
+
+```bash
+cd assets
+
+git pull origin main      # Or checkout a new tag, e.g. v1.0.1
+git lfs pull
+
+cd ..
+git add assets
+git commit -m "chore(assets): update assets to latest main"
+git push
+```
+
+> If you want **strict stability**, skip `git pull origin main` and stay pinned to a tag.
+
+---
+
+## 8️⃣ Adding or Updating Assets (For Asset Maintainers)
+
+Only developers with write access to `anino-assets` should modify assets directly.
+
+### Step 1 – Update the Asset Repository
+
+```bash
+cd assets
+
+# Add or update assets in web/ or shared/
+# e.g. add new sprite, audio, background
+
+git add .
+git commit -m "feat(assets): add new background for chapter 3"
+git push origin main
+```
+
+### Step 2 – Update Game Repo Pointer
+
+```bash
+cd ..
+
+git add assets
+git commit -m "chore(assets): update submodule to latest main"
+git push
+```
+
+The game repo now references the new asset commit.
+
+---
+
+## 9️⃣ Commands Cheat Sheet
+
+| Task | Command |
+|------|---------|
+| Clone game repo with assets | `git clone --recurse-submodules <repo>` |
+| Initialize submodules | `git submodule update --init --recursive` |
+| Sparse checkout `web` + `shared` | `cd assets && git sparse-checkout init --cone && git sparse-checkout set web shared` |
+| Pull latest LFS assets | `cd assets && git lfs pull` |
+| Pull latest asset updates | `cd assets && git pull origin main && git lfs pull && cd .. && git add assets && git commit -m "chore(assets): update assets"` |
+| Lock assets to tag | `cd assets && git checkout v1.0.0 && cd .. && git add assets && git commit -m "chore(assets): lock assets"` |
+
+---
+
+## 🔟 Notes & Best Practices
+
+1. **Do not `.gitignore` the `assets/` folder** – It must be tracked as a submodule.
+2. **Always use Git LFS** for large binary files (textures, audio, video, PSDs).
+3. **Use sparse checkout** per project to reduce disk usage and clone time.
+4. **Tag assets for stability** and lock game repos to specific tags for releases.
+5. **Avoid editing submodule content directly from game repos** – Make changes in `anino-assets` and then update the submodule pointer.
+6. **Document asset versions in release notes** – Note which asset tag/commit each game release uses.
+7. **Use semantic versioning for tags** in `anino-assets` (e.g., `v1.0.0`, `v1.1.0`).
+8. **Keep asset changes atomic** – Small, focused commits improve traceability.
+9. **Coordinate asset updates with game code changes** – Especially when asset structure changes (paths, filenames).
+
+---
+
+## Legacy CI/CD Notes (For Asset Repository Maintainers)
+
+The `anino-assets` repository includes CI/CD workflows that:
+
+- Validate required directories (`web/`, `shared/`, etc.)
+- Ensure large files are tracked by Git LFS
+- Generate `asset-manifest.txt` for auditing and releases
+
+These workflows live in `.github/workflows/` of **anino-assets**, not the game repo.
+
+Game projects (like `anino-visual-novel`) typically:
+
+- Treat `assets/` as a read-only submodule in day-to-day dev
+- Only update the submodule pointer when new validated assets are ready
+
+---
+
+## Troubleshooting
+
+### LFS Pointers Instead of Real Files
+
+If you see small text files instead of actual assets in `assets/`:
+
+```bash
+cd assets
+git lfs install
+git lfs pull
+```
+
+### Submodule Not Updating
+
+If `assets/` seems stuck on an old commit:
+
+```bash
+cd assets
+git fetch
+
+git status       # Check current commit
+git log --oneline -5
+```
+
+Ensure the game repo updated the submodule pointer and that you ran:
+
+```bash
+git submodule update --init --recursive
+```
+
+### Sparse Checkout Misconfigured
+
+If unwanted folders appear or expected ones are missing:
+
+```bash
+cd assets
+
+git sparse-checkout init --cone
+git sparse-checkout set web shared
+
+git pull
 ```
 
 ---
 
-## 5. Best Practices
+## References
 
-1. **Minimal Submodule Inclusion:** Only clone the folders required for the current game type to optimize project size.
-2. **Shared Assets Management:** Include the `shared/` folder when multiple game types depend on common assets.
-3. **Submodule Editing:** Avoid making direct changes in submodules. Update the central asset repository and propagate updates.
-4. **Git LFS Awareness:** Ensure all team members have Git LFS installed to handle large binary files correctly.
-5. **Git Ignore Local Files:** Exclude any local caches or generated files from the submodule using `.gitignore`.
-6. **Version Pinning:** Consider pinning submodules to a specific commit for stable builds.
-7. **CI/CD Trust:** Always ensure the Assets CI workflow passes before merging to `main`.
-8. **Release Tagging:** Use semantic versioning for all release tags to maintain clarity on asset versions.
-9. **Artifact Retention:** Asset manifests are retained for 30 days; download them if long-term records are needed.
-
----
-
-## 6. Troubleshooting
-
-### Large Files Not Tracked by Git LFS
-
-If the Assets CI workflow fails with "untracked large files" error:
-
-1. Verify `.gitattributes` includes patterns for your file types
-2. Remove the file from Git history:
-   ```bash
-   git rm --cached <large-file>
-   git add .gitattributes
-   git commit -m "Configure Git LFS for <file-type>"
-   ```
-3. Re-add the file (will now be tracked by LFS)
-
-### Missing Required Folders
-
-If workflow fails due to missing folders:
-
-1. Ensure all folders (`ar/`, `rpg/`, `vr/`, `web/`, `shared/`, `metadata/`) exist at repository root
-2. Create placeholder files if folders are empty:
-   ```bash
-   touch ar/.gitkeep
-   touch rpg/.gitkeep
-   touch vr/.gitkeep
-   touch web/.gitkeep
-   touch shared/.gitkeep
-   touch metadata/.gitkeep
-   ```
-
-### Git LFS Not Pulling Files
-
-If LFS files appear as pointers (not actual content):
-
-1. Ensure Git LFS is installed: `git lfs install`
-2. Pull LFS files: `git lfs pull`
-3. Verify LFS tracking: `git lfs ls-files`
-
----
-
-## 7. References
-
-* [Git Submodules Documentation](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
-* [Git LFS Documentation](https://git-lfs.github.com/)
-* [GitHub Actions Documentation](https://docs.github.com/en/actions)
-* [Semantic Versioning](https://semver.org/)
-* Anino Asset Repository: [https://github.com/NoContextOrg/anino-assets.git](https://github.com/NoContextOrg/anino-assets.git)
+- Git Submodules: https://git-scm.com/book/en/v2/Git-Tools-Submodules
+- Git LFS: https://git-lfs.github.com/
+- Sparse Checkout: https://git-scm.com/docs/git-sparse-checkout
+- Anino Assets Repo: https://github.com/NoContextOrg/anino-assets.git
+- Anino Visual Novel Repo: https://github.com/NoContextOrg/anino-visual-novel.git
 
 ---
 
