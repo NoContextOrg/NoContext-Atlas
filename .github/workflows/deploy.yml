@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main, master ]
-    paths:
+    paths-ignore:
       - '**.md'
       - 'generate-index.js'
       - 'index.html'
@@ -54,34 +54,43 @@ jobs:
           done
           echo "✅ Files copied to _site/"
 
+      - name: 📦 Install dependencies
+        run: npm install
+
       - name: 🔍 Generate search index
         run: |
-          # Generate index from current directory (scans all markdown files in repo)
-          node generate-index.js
-          # Verify index was generated
-          if [ ! -f index.json ]; then
-            echo "✗ index.json not generated!"
+          # Generate the knowledge graph
+          node src/cli.js
+          # Verify graph was generated
+          if [ ! -f knowledge_graph.json ]; then
+            echo "✗ knowledge_graph.json not generated!"
             exit 1
           fi
           # Copy to _site/ for deployment
-          cp index.json _site/
-          echo "✅ Search index generated and copied to _site/"
+          cp knowledge_graph.json _site/
+          echo "✅ Knowledge graph generated and copied to _site/"
+
+      - name: 🛡️ Validate knowledge graph
+        run: |
+          echo "=== Graph Validation ==="
+          # A basic validation: check if nodes exist. A more robust script could check for broken edges.
+          node -e "const g = require('./knowledge_graph.json'); if(!g.nodes || g.nodes.length === 0) { throw new Error('Graph has no nodes!'); } console.log('✓ Graph contains ' + g.nodes.length + ' nodes.');"
 
       - name: ✅ Verify deployment contents
         run: |
           echo "=== Deployment Verification ==="
           echo "📄 HTML files:"
           ls -lh _site/*.html 2>/dev/null || echo "  None found"
-          echo "📊 Index file:"
-          ls -lh _site/index.json 2>/dev/null || echo "  Not found!"
+          echo "📊 Graph file:"
+          ls -lh _site/knowledge_graph.json 2>/dev/null || echo "  Not found!"
           echo "📝 Sample markdown files:"
           find _site -name "*.md" -type f | head -5
-          if [ -f _site/index.json ]; then
-            count=$(grep -o '"url"' _site/index.json | wc -l)
-            echo "✓ Index contains $count entries"
+          if [ -f _site/knowledge_graph.json ]; then
+            count=$(jq '.nodes | length' _site/knowledge_graph.json)
+            echo "✓ Graph contains $count nodes"
             [ $count -gt 0 ] || exit 1
           else
-            echo "✗ index.json not found!"
+            echo "✗ knowledge_graph.json not found!"
             exit 1
           fi
 
@@ -103,5 +112,5 @@ jobs:
           echo "✓ Repository: ${{ github.repository }}"
           echo "✓ Branch: ${{ github.ref_name }}"
           echo "✓ Pages URL: ${{ steps.deployment.outputs.page_url }}"
-          echo "📍 Deployed: index.html, viewer.html, index.json, project folders"
+          echo "📍 Deployed: index.html, viewer.html, knowledge_graph.json, project folders"
           echo "🔗 Visit: ${{ steps.deployment.outputs.page_url }}"

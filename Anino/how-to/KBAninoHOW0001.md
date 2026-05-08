@@ -1,4 +1,4 @@
-# KBAninoHOW0001: Asset Management Using Git Submodules, Sparse Checkout, and Git LFS
+# KBAninoHOW0001: Asset Management Using Git Submodules, Sparse Checkout, and Git lfs
 
 ## Overview
 

@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NoContext Atlas - Knowledge Base Search</title>
   <style>
+    /* Keep the stable original search UI styling (as baseline) */
     * {
       margin: 0;
       padding: 0;
@@ -20,7 +21,7 @@
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       background: white;
       border-radius: 12px;
@@ -36,9 +37,9 @@
     }
 
     .header h1 {
-      font-size: 2.5em;
+      font-size: 2.3em;
       margin-bottom: 10px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .header p {
@@ -47,13 +48,13 @@
     }
 
     .search-section {
-      padding: 30px;
+      padding: 24px;
       background: #f8f9fa;
       border-bottom: 1px solid #e9ecef;
     }
 
     .search-wrapper {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .search-input {
@@ -61,19 +62,15 @@
       padding: 14px 18px;
       font-size: 1em;
       border: 2px solid #e9ecef;
-      border-radius: 8px;
-      transition: all 0.3s ease;
+      border-radius: 10px;
+      transition: all 0.2s ease;
       background: white;
     }
 
     .search-input:focus {
       outline: none;
       border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .search-input::placeholder {
-      color: #999;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
     }
 
     .filter-row {
@@ -91,7 +88,7 @@
     .filter-group label {
       display: block;
       font-size: 0.9em;
-      font-weight: 600;
+      font-weight: 700;
       color: #666;
       margin-bottom: 8px;
     }
@@ -100,11 +97,10 @@
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #e9ecef;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 0.95em;
       background: white;
       cursor: pointer;
-      transition: border-color 0.3s ease;
     }
 
     .filter-select:focus {
@@ -114,11 +110,11 @@
 
     .stats {
       display: flex;
-      gap: 20px;
+      gap: 18px;
       flex-wrap: wrap;
-      padding-top: 15px;
+      padding-top: 14px;
       border-top: 1px solid #e0e0e0;
-      margin-top: 15px;
+      margin-top: 14px;
     }
 
     .stat-item {
@@ -130,75 +126,59 @@
 
     .stat-label {
       color: #666;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .stat-value {
       color: #667eea;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 1.1em;
     }
 
     .results-section {
-      padding: 30px;
+      padding: 24px;
     }
 
     .results-header {
-      margin-bottom: 25px;
-      padding-bottom: 15px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
       border-bottom: 2px solid #f0f0f0;
     }
 
     .results-header h2 {
-      font-size: 1.3em;
+      font-size: 1.2em;
       color: #333;
-      margin-bottom: 5px;
+      margin: 0;
     }
 
     .results-list {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 14px;
     }
 
     .result-item {
       background: #f8f9fa;
       border-left: 4px solid #667eea;
-      padding: 18px;
-      border-radius: 6px;
-      transition: all 0.3s ease;
+      padding: 16px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
       cursor: pointer;
       display: block;
     }
 
     .result-item:hover {
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      transform: translateX(4px);
+      transform: translateX(2px);
       background: #f0f2ff;
     }
 
-    .result-item-inner {
-      display: contents;
-    }
-
     .result-title {
-      font-size: 1.1em;
-      font-weight: 700;
+      font-size: 1.05em;
+      font-weight: 800;
       color: #667eea;
       margin-bottom: 8px;
       word-break: break-word;
-      cursor: pointer;
-    }
-
-    .result-title a {
-      color: #667eea;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .result-title a:hover {
-      color: #764ba2;
-      text-decoration: underline;
     }
 
     .result-path {
@@ -219,13 +199,13 @@
       background-color: #fff3cd;
       padding: 2px 4px;
       border-radius: 3px;
-      font-weight: 600;
+      font-weight: 700;
       color: #856404;
     }
 
     .result-meta {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       flex-wrap: wrap;
       align-items: center;
       font-size: 0.85em;
@@ -236,13 +216,13 @@
       background: #667eea;
       color: white;
       padding: 4px 10px;
-      border-radius: 4px;
-      font-weight: 600;
+      border-radius: 999px;
+      font-weight: 700;
     }
 
     .result-matches {
       color: #28a745;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .empty-state {
@@ -252,52 +232,23 @@
     }
 
     .empty-state-icon {
-      font-size: 3em;
-      margin-bottom: 15px;
+      font-size: 2.4em;
+      margin-bottom: 12px;
     }
 
     .empty-state h3 {
-      font-size: 1.3em;
+      font-size: 1.2em;
       color: #666;
-      margin-bottom: 10px;
-    }
-
-    .empty-state p {
-      font-size: 1em;
-      color: #999;
+      margin-bottom: 8px;
     }
 
     .footer {
       background: #f8f9fa;
-      padding: 20px 30px;
+      padding: 18px 24px;
       text-align: center;
       font-size: 0.9em;
       color: #666;
       border-top: 1px solid #e9ecef;
-    }
-
-    @media (max-width: 768px) {
-      .header h1 {
-        font-size: 1.8em;
-      }
-
-      .filter-row {
-        flex-direction: column;
-      }
-
-      .filter-group {
-        min-width: 100%;
-      }
-
-      .stats {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .result-meta {
-        flex-direction: column;
-        gap: 8px;
-      }
     }
 
     .loading {
@@ -326,7 +277,7 @@
       }
     }
 
-    /* Markdown Viewer Styles */
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -336,7 +287,6 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.6);
-      animation: fadeIn 0.3s ease;
     }
 
     .modal.active {
@@ -356,13 +306,12 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      animation: slideIn 0.3s ease;
     }
 
     .modal-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 20px 30px;
+      padding: 18px 22px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -371,7 +320,7 @@
 
     .modal-header h2 {
       margin: 0;
-      font-size: 1.5em;
+      font-size: 1.3em;
     }
 
     .modal-close {
@@ -380,130 +329,20 @@
       color: white;
       font-size: 28px;
       cursor: pointer;
-      padding: 0;
       width: 40px;
       height: 40px;
-      border-radius: 4px;
-      transition: background 0.3s ease;
-    }
-
-    .modal-close:hover {
-      background: rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
     }
 
     .modal-body {
       overflow-y: auto;
-      padding: 30px;
+      padding: 22px;
       flex: 1;
-    }
-
-    .markdown-content {
-      line-height: 1.8;
-      color: #333;
-    }
-
-    .markdown-content h1 {
-      font-size: 2em;
-      margin: 30px 0 15px 0;
-      color: #667eea;
-      border-bottom: 3px solid #667eea;
-      padding-bottom: 10px;
-    }
-
-    .markdown-content h2 {
-      font-size: 1.5em;
-      margin: 25px 0 12px 0;
-      color: #764ba2;
-    }
-
-    .markdown-content h3 {
-      font-size: 1.2em;
-      margin: 20px 0 10px 0;
-      color: #555;
-    }
-
-    .markdown-content p {
-      margin: 12px 0;
-    }
-
-    .markdown-content ul,
-    .markdown-content ol {
-      margin: 15px 0 15px 30px;
-    }
-
-    .markdown-content li {
-      margin: 8px 0;
-    }
-
-    .markdown-content code {
-      background: #f4f4f4;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9em;
-      color: #d73a49;
-    }
-
-    .markdown-content pre {
-      background: #f4f4f4;
-      padding: 15px;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin: 15px 0;
-      border-left: 4px solid #667eea;
-    }
-
-    .markdown-content pre code {
-      background: none;
-      color: #333;
-      padding: 0;
-    }
-
-    .markdown-content blockquote {
-      margin: 15px 0;
-      padding: 10px 15px;
-      border-left: 4px solid #667eea;
-      background: #f8f9fa;
-      color: #666;
-    }
-
-    .markdown-content table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 15px 0;
-    }
-
-    .markdown-content table th,
-    .markdown-content table td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .markdown-content table th {
-      background: #f8f9fa;
-      font-weight: 600;
-      color: #667eea;
-    }
-
-    .markdown-content table tr:hover {
-      background: #f8f9fa;
-    }
-
-    .markdown-content a {
-      color: #667eea;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .markdown-content a:hover {
-      color: #764ba2;
-      text-decoration: underline;
     }
 
     .modal-info {
       background: #f8f9fa;
-      padding: 10px 30px;
+      padding: 10px 22px;
       font-size: 0.9em;
       color: #666;
       border-top: 1px solid #e9ecef;
@@ -511,60 +350,159 @@
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
+      gap: 10px;
     }
 
-    .modal-info-left {
-      flex: 1;
+    /* Local Ops additions: minimal + non-conflicting */
+    .hidden {
+      display: none !important;
     }
 
-    .modal-info-right {
-      text-align: right;
+    .btn-action-sm {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 800;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
+    .btn-action-sm.success {
+      background: #28a745;
     }
 
-    @keyframes slideIn {
-      from {
-        transform: translateY(-50px);
-        opacity: 0;
-      }
+    .btn-action-sm.danger {
+      background: #dc3545;
+    }
 
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+    .link-btn {
+      background: transparent;
+      border: 1px solid #e9ecef;
+      color: #444;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .link-btn:hover {
+      background: #f2f4f7;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .panel-title {
+      font-weight: 900;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .panel-sub {
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    label.small {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 800;
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .soft {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      overflow: auto;
+      background: #fff;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
     }
 
     @media (max-width: 768px) {
-      .modal-content {
-        max-height: 95vh;
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .filter-row {
+        flex-direction: column;
+      }
+
+      .filter-group {
+        min-width: 100%;
+      }
+
+      .stats {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .result-meta {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
       }
 
       .modal-info {
         flex-direction: column;
-        gap: 10px;
-        text-align: left;
+        align-items: flex-start;
       }
 
-      .modal-info-right {
-        text-align: left;
+      body {
+        padding: 12px;
       }
+    }
 
-      .markdown-content h1 {
-        font-size: 1.5em;
-      }
+    /* Ensure search section matches the previous stable layout regardless of local ops panels */
+    #viewHome .search-wrapper {
+      margin-top: 0;
+    }
 
-      .markdown-content h2 {
-        font-size: 1.2em;
-      }
+    /* Remove pill styling dependency (was from newer theme) */
+    .pill {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.85em;
+      font-weight: 800;
+      margin-left: 8px;
     }
   </style>
 </head>
@@ -572,40 +510,177 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>🔍 NoContext Atlas</h1>
-      <p>Centralized Knowledge Base Search</p>
+      <h1>NoContext Atlas</h1>
+      <p>Knowledge base search + local ops</p>
     </div>
 
     <div class="search-section">
-      <div class="search-wrapper">
-        <input type="text" id="searchInput" class="search-input"
-          placeholder="Search by title, content, or keywords... e.g., 'sensor offline', 'nginx setup'"
-          autocomplete="off">
+      <!-- Views: Home (search + local ops) and New Markdown page -->
+      <div id="viewHome" class="view active">
+        <!-- Local-only Ops Panel -->
+        <div id="localOpsPanel" class="hidden panel" style="margin-bottom:16px;">
+          <div class="row" style="justify-content:space-between;">
+            <div class="stack" style="gap:4px;">
+              <div class="panel-title">Local Ops <span class="pill">localhost</span></div>
+              <div class="panel-sub">Organize directories, upload assets, and create markdown files</div>
+            </div>
+            <div class="row">
+              <button id="btnLocalReindex" class="link-btn" type="button">Reindex</button>
+              <button id="btnGoNewMarkdown" class="btn-action-sm" type="button">New Markdown</button>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top:14px;">
+            <!-- Explorer -->
+            <div class="panel">
+              <div class="row" style="justify-content:space-between;">
+                <div class="stack" style="gap:4px;">
+                  <div class="panel-title">Mini Explorer</div>
+                  <div class="panel-sub">Double click folder to open, file to preview</div>
+                </div>
+                <div class="row">
+                  <button id="btnFsUp" class="link-btn" type="button">Up</button>
+                  <button id="btnFsRefresh" class="link-btn" type="button">Refresh</button>
+                </div>
+              </div>
+
+              <div class="row" style="margin-top:10px; gap:8px;">
+                <span style="color: var(--muted); font-size:0.9em; font-weight:700;">Current</span>
+                <code id="fsCurrentPath" style="background:#f2f4f7; padding:3px 8px; border-radius:8px;">(root)</code>
+              </div>
+
+              <div id="fsList" class="soft" style="margin-top:10px; max-height:280px; overflow:auto;"></div>
+
+              <div class="row" style="margin-top:10px;">
+                <input id="fsNewFolderName" type="text" class="search-input" style="padding:10px 12px;" placeholder="New folder name">
+                <button id="btnFsMkdir" class="btn-action-sm success" type="button">Create folder</button>
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <button id="btnFsRename" class="link-btn" type="button" disabled>Rename</button>
+                <button id="btnFsDelete" class="link-btn" type="button" disabled style="border-color: rgba(217,45,32,0.25); color: var(--danger);">Delete</button>
+              </div>
+
+              <div id="fsStatus" style="margin-top:8px; font-size:0.85em; color: var(--muted);"></div>
+            </div>
+
+            <!-- Actions -->
+            <div class="stack" style="gap:14px;">
+              <div class="panel">
+                <div class="panel-title">Directory quick-pick</div>
+                <div class="panel-sub">Dropdowns only show top directories by default</div>
+
+                <div class="grid-2" style="margin-top:10px;">
+                  <div>
+                    <label class="small">Create directory</label>
+                    <select id="dirSelectCreate" class="filter-select">
+                      <option value="">Select a folder…</option>
+                    </select>
+                    <div class="panel-sub" style="margin-top:6px;">Or type: <code id="createDirTyped" style="background:#f2f4f7; padding:2px 6px; border-radius:6px;">(none)</code></div>
+                    <input id="landingNewDir" type="text" class="search-input" style="padding:10px 12px; margin-top:8px;" placeholder="Custom path (optional)">
+                  </div>
+                  <div>
+                    <label class="small">Upload directory</label>
+                    <select id="dirSelectUpload" class="filter-select">
+                      <option value="">Select a folder…</option>
+                    </select>
+                    <div class="panel-sub" style="margin-top:6px;">Or type: <code id="uploadDirTyped" style="background:#f2f4f7; padding:2px 6px; border-radius:6px;">(none)</code></div>
+                    <input id="landingUploadDir" type="text" class="search-input" style="padding:10px 12px; margin-top:8px;" placeholder="Blank = uploads/YYYY-MM-DD/">
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-title">Upload asset</div>
+                <div class="panel-sub">Pick a directory from dropdown or leave blank for auto uploads folder</div>
+
+                <div class="row" style="margin-top:10px;">
+                  <input type="file" id="landingAssetFile" style="flex:1;" />
+                  <button id="btnLandingUpload" class="btn-action-sm" type="button">Upload</button>
+                </div>
+
+                <div class="row" style="margin-top:10px;">
+                  <button id="btnLandingCopyLink" class="link-btn" type="button" disabled>Copy markdown link</button>
+                </div>
+
+                <div id="landingUploadResult" style="margin-top:10px; font-size:0.9em; color:#111827;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="search-wrapper">
+          <input type="text" id="searchInput" class="search-input"
+            placeholder="Search by title, content, or keywords... e.g., 'sensor offline', 'nginx setup'"
+            autocomplete="off">
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="categoryFilter">Category</label>
+            <select id="categoryFilter" class="filter-select">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="projectFilter">Project</label>
+            <select id="projectFilter" class="filter-select">
+              <option value="">All Projects</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-item">
+            <span class="stat-label">Total Articles:</span>
+            <span class="stat-value" id="totalArticles">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Results Found:</span>
+            <span class="stat-value" id="resultsCount">0</span>
+          </div>
+        </div>
       </div>
 
-      <div class="filter-row">
-        <div class="filter-group">
-          <label for="categoryFilter">Category</label>
-          <select id="categoryFilter" class="filter-select">
-            <option value="">All Categories</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="projectFilter">Project</label>
-          <select id="projectFilter" class="filter-select">
-            <option value="">All Projects</option>
-          </select>
-        </div>
-      </div>
+      <div id="viewNewMarkdown" class="view">
+        <div class="panel">
+          <div class="row" style="justify-content:space-between;">
+            <div class="stack" style="gap:4px;">
+              <div class="panel-title">New Markdown File</div>
+              <div class="panel-sub">Create a new markdown file in the repo (local mode only)</div>
+            </div>
+            <div class="row">
+              <button id="btnBackHome" class="link-btn" type="button">Back</button>
+              <button id="btnCreateFromPage" class="btn-action-sm success" type="button">Create</button>
+            </div>
+          </div>
 
-      <div class="stats">
-        <div class="stat-item">
-          <span class="stat-label">Total Articles:</span>
-          <span class="stat-value" id="totalArticles">0</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Results Found:</span>
-          <span class="stat-value" id="resultsCount">0</span>
+          <div class="grid-2" style="margin-top:14px;">
+            <div>
+              <label class="small">Directory</label>
+              <select id="dirSelectCreatePage" class="filter-select">
+                <option value="">Select a folder…</option>
+              </select>
+              <input id="newPageDir" type="text" class="search-input" style="padding:10px 12px; margin-top:8px;" placeholder="Or type a custom directory">
+
+              <label class="small" style="margin-top:12px;">Filename</label>
+              <input id="newPageFilename" type="text" class="search-input" style="padding:10px 12px;" placeholder="KBAninoDOCS0008.md">
+
+              <label class="small" style="margin-top:12px;">Template</label>
+              <select id="newPageTemplate" class="filter-select">
+                <option value="blank">Blank</option>
+                <option value="doc">Doc</option>
+                <option value="runbook">Runbook</option>
+                <option value="incident">Incident</option>
+              </select>
+            </div>
+            <div>
+              <label class="small">Content</label>
+              <textarea id="newPageContent" class="editor-textarea" style="min-height:260px;"></textarea>
+            </div>
+          </div>
+
+          <div id="newPageStatus" style="margin-top:10px; font-size:0.9em; color: var(--muted);"></div>
         </div>
       </div>
     </div>
@@ -615,7 +690,7 @@
     </div>
 
     <div class="footer">
-      <p>🏢 NoContext IT Operations | Powered by Atlas Search Engine</p>
+      <p>NoContext IT Operations | Atlas</p>
     </div>
   </div>
 
@@ -634,6 +709,7 @@
           <span id="modalPath"></span>
         </div>
         <div class="modal-info-right">
+          <button id="modalBtnEdit" class="hidden" style="background:#667eea; color:white; border:none; padding:5px 12px; border-radius:4px; cursor:pointer; margin-right:10px; font-weight:bold;">✏️ Edit Document</button>
           <a id="modalDownload" href="#" target="_blank" style="color: #667eea; text-decoration: none;">📥 View Raw</a>
         </div>
       </div>
@@ -646,6 +722,11 @@
      * Minimal, lightweight, and fully client-side
      */
 
+    // CMS State Configuration
+    const isLocalMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    let currentRawMarkdown = "";
+    let currentFilePath = "";
+
     class KBSearch {
       constructor() {
         this.index = [];
@@ -653,6 +734,26 @@
         this.categories = new Set();
         this.projects = new Set();
         this.init();
+      }
+
+      async reloadIndex() {
+        // Re-fetch index.json with cache-busting
+        const indexPath = `./index.json?ts=${Date.now()}`;
+        const response = await fetch(indexPath);
+        if (!response.ok) throw new Error(`Failed to reload index: ${response.status}`);
+
+        this.index = await response.json();
+        this.categories = new Set();
+        this.projects = new Set();
+
+        // Reset filter options
+        const categorySelect = document.getElementById('categoryFilter');
+        const projectSelect = document.getElementById('projectFilter');
+        categorySelect.innerHTML = '<option value="">All Categories</option>';
+        projectSelect.innerHTML = '<option value="">All Projects</option>';
+
+        this.buildIndex();
+        this.search();
       }
 
       async init() {
@@ -921,8 +1022,15 @@
         }
 
         const markdown = await response.text();
+        currentRawMarkdown = markdown; // Store for editor
+        currentFilePath = filePath;    // Store path context
+
         const html = convertMarkdownToHtml(markdown);
         contentDiv.innerHTML = html;
+
+        if (isLocalMode) {
+          document.getElementById('modalBtnEdit').classList.remove('hidden');
+        }
       } catch (error) {
         console.error('Error loading markdown:', error);
         contentDiv.innerHTML = `<div style="color: red; padding: 20px;">
@@ -994,25 +1102,309 @@
       return html;
     }
 
-    // Initialize search engine when DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
-      new KBSearch();
+    function buildTemplate(templateKey) {
+      const today = new Date().toISOString().split('T')[0];
+      switch (templateKey) {
+        case 'incident':
+          return `---\ntitle: Incident - System - Summary\nproject: \ncategory: incident\ntags: []\nstatus: draft\nlast_updated: ${today}\n---\n\n# Incident\n\n## Summary\n\n## Impact\n\n## Timeline\n\n## Root Cause\n\n## Resolution\n\n## Follow-ups\n`;
+        case 'runbook':
+          return `---\ntitle: Runbook - System - Procedure\nproject: \ncategory: runbook\ntags: []\nstatus: active\nlast_updated: ${today}\n---\n\n# Runbook\n\n## Purpose\n\n## Preconditions\n\n## Steps\n\n## Verification\n\n## Rollback\n`;
+        case 'doc':
+          return `---\ntitle: Doc - Topic\nproject: \ncategory: docs\ntags: []\nstatus: draft\nlast_updated: ${today}\n---\n\n# Title\n\n## Context\n\n## Details\n`;
+        default:
+          return '';
+      }
+    }
 
-      // Setup modal event listeners
-      const modal = document.getElementById('markdownModal');
-      if (modal) {
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            closeMarkdownViewer();
+    async function localReindexNow() {
+      const r = await fetch('/api/reindex', { method: 'POST' });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j || !j.success) {
+        throw new Error((j && j.error) ? j.error : `HTTP ${r.status}`);
+      }
+      return j;
+    }
+
+    async function landingCreateMarkdown() {
+      // Legacy function retained but no longer used by the UI.
+      // (Creation is handled via the dedicated New Markdown view.)
+      alert('Use Local Ops → New Markdown to create a file.');
+    }
+
+    async function landingUploadAsset() {
+      const input = document.getElementById('landingAssetFile');
+      const uploadDir = document.getElementById('landingUploadDir').value.trim();
+      const resultDiv = document.getElementById('landingUploadResult');
+      const copyBtn = document.getElementById('btnLandingCopyLink');
+
+      resultDiv.textContent = '';
+      copyBtn.disabled = true;
+      copyBtn.dataset.md = '';
+
+      if (!input.files || input.files.length === 0) {
+        alert('Choose a file to upload.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('asset', input.files[0]);
+      if (uploadDir) formData.append('directory', uploadDir);
+
+      const response = await fetch('/api/upload', { method: 'POST', body: formData });
+      const result = await response.json().catch(() => null);
+
+      if (response.ok && result && result.success) {
+        const assetPath = `/${result.filePath}`;
+        const md = `![${input.files[0].name}](${assetPath})`;
+        resultDiv.innerHTML = `Uploaded: <code>${result.filePath}</code>`;
+        copyBtn.disabled = false;
+        copyBtn.dataset.md = md;
+      } else {
+        const msg = (result && result.error) ? result.error : `HTTP ${response.status}`;
+        alert('Upload failed: ' + msg);
+      }
+
+      input.value = '';
+    }
+
+    async function landingCopyMarkdownLink() {
+      const copyBtn = document.getElementById('btnLandingCopyLink');
+      const md = copyBtn.dataset.md;
+      if (!md) return;
+      await navigator.clipboard.writeText(md);
+      alert('Copied markdown link to clipboard.');
+    }
+
+    // Mini file explorer state
+    let fsCurrent = '';
+    let fsSelected = null; // { path, type, name }
+
+    function setFsStatus(msg) {
+      const s = document.getElementById('fsStatus');
+      if (s) s.textContent = msg || '';
+    }
+
+    function setFsButtonsEnabled() {
+      // Updated UI only has Rename/Delete buttons.
+      const rename = document.getElementById('btnFsRename');
+      const del = document.getElementById('btnFsDelete');
+
+      const hasSel = !!fsSelected;
+      if (rename) rename.disabled = !hasSel;
+      if (del) del.disabled = !hasSel;
+    }
+
+    function renderFsList(items) {
+      const list = document.getElementById('fsList');
+      if (!list) return;
+
+      list.innerHTML = items.map(it => {
+        const icon = it.type === 'dir' ? '📁' : '📄';
+        const isActive = fsSelected && fsSelected.path === it.path;
+        const bg = isActive ? 'background:#f0f2ff; border-left:3px solid #667eea;' : 'background:#fff; border-left:3px solid transparent;';
+
+        return `
+          <div data-path="${it.path}" data-type="${it.type}" data-name="${it.name}"
+               style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; cursor:pointer; ${bg}">
+            <div style="display:flex; gap:8px; align-items:center; min-width:0;">
+              <span>${icon}</span>
+              <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.name}</span>
+            </div>
+            <div style="font-size:0.8em; color:#999;">
+              ${it.type === 'file' ? `${Math.round(it.size / 1024)} KB` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      list.querySelectorAll('div[data-path]').forEach(el => {
+        el.addEventListener('click', () => {
+          fsSelected = { path: el.dataset.path, type: el.dataset.type, name: el.dataset.name };
+          renderFsList(items);
+          setFsButtonsEnabled();
+          setFsStatus(`Selected: ${fsSelected.path}`);
+        });
+
+        el.addEventListener('dblclick', () => {
+          const t = el.dataset.type;
+          const p = el.dataset.path;
+          if (t === 'dir') {
+            fsSelected = null;
+            fsCurrent = p;
+            loadFsList().catch(e => alert('FS list failed: ' + e.message));
+          } else {
+            // open file in modal
+            openMarkdownViewer(p, el.dataset.name);
           }
         });
-      }
-    });
+      });
+    }
 
-    // Close modal on Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeMarkdownViewer();
+    async function loadFsList() {
+      const currentLabel = document.getElementById('fsCurrentPath');
+      if (currentLabel) currentLabel.textContent = fsCurrent ? fsCurrent : '(root)';
+
+      setFsStatus('Loading...');
+      const q = fsCurrent ? `?path=${encodeURIComponent(fsCurrent)}` : '';
+      const r = await fetch(`/api/fs/list${q}`);
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j || !j.success) {
+        throw new Error((j && j.error) ? j.error : `HTTP ${r.status}`);
+      }
+
+      renderFsList(j.items || []);
+      setFsStatus('');
+      setFsButtonsEnabled();
+    }
+
+    async function fsMkdir() {
+      const name = document.getElementById('fsNewFolderName').value.trim();
+      if (!name) return;
+
+      const target = fsCurrent ? `${fsCurrent}/${name}` : name;
+      const r = await fetch('/api/fs/mkdir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: target })
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j || !j.success) throw new Error((j && j.error) ? j.error : `HTTP ${r.status}`);
+
+      document.getElementById('fsNewFolderName').value = '';
+      await loadFsList();
+      try { await kbSearchInstance?.reloadIndex?.(); } catch { /* ignore */ }
+    }
+
+    async function fsRename() {
+      if (!fsSelected) return;
+      const current = fsSelected.path;
+      const newName = prompt('Rename to:', fsSelected.name);
+      if (!newName) return;
+
+      const parent = current.includes('/') ? current.split('/').slice(0, -1).join('/') : '';
+      const target = parent ? `${parent}/${newName}` : newName;
+
+      const r = await fetch('/api/fs/rename', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: current, to: target })
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j || !j.success) throw new Error((j && j.error) ? j.error : `HTTP ${r.status}`);
+
+      fsSelected = null;
+      await loadFsList();
+      try { await kbSearchInstance?.reloadIndex?.(); } catch { /* ignore */ }
+    }
+
+    async function fsDelete() {
+      if (!fsSelected) return;
+      const ok = confirm(`Delete ${fsSelected.type === 'dir' ? 'folder' : 'file'}: ${fsSelected.path}?`);
+      if (!ok) return;
+
+      const r = await fetch('/api/fs/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: fsSelected.path })
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j || !j.success) throw new Error((j && j.error) ? j.error : `HTTP ${r.status}`);
+
+      fsSelected = null;
+      await loadFsList();
+      try { await kbSearchInstance?.reloadIndex?.(); } catch { /* ignore */ }
+    }
+
+    function fsUp() {
+      if (!fsCurrent) return;
+      const parts = fsCurrent.split('/').filter(Boolean);
+      parts.pop();
+      fsCurrent = parts.join('/');
+      fsSelected = null;
+      loadFsList().catch(e => alert('FS list failed: ' + e.message));
+    }
+
+    // Remove unused/legacy functions that confuse flow
+    function fsUseForCreate() { /* handled via dropdown + typed field */ }
+    function fsUseForUpload() { /* handled via dropdown + typed field */ }
+
+    // Robust dropdown populate: after index load and after reload
+    function repopulateDirDropdownsSafe() {
+      if (!kbSearchInstance || !kbSearchInstance.index) return;
+      const dirs = getTopDirsFromIndex(kbSearchInstance.index, 12);
+      populateDirDropdown(document.getElementById('dirSelectCreate'), dirs);
+      populateDirDropdown(document.getElementById('dirSelectUpload'), dirs);
+      populateDirDropdown(document.getElementById('dirSelectCreatePage'), dirs);
+    }
+
+    // Ensure a single init path, similar to the previously working setup
+    let kbSearchInstance;
+    document.addEventListener('DOMContentLoaded', () => {
+      kbSearchInstance = new KBSearch();
+
+      // Wire dropdowns once
+      wireDirDropdown('dirSelectCreate', 'landingNewDir', 'createDirTyped');
+      wireDirDropdown('dirSelectUpload', 'landingUploadDir', 'uploadDirTyped');
+      wireDirDropdown('dirSelectCreatePage', 'newPageDir', null);
+
+      // After initial init completes, populate dropdowns
+      setTimeout(() => repopulateDirDropdownsSafe(), 50);
+
+      // Patch reloadIndex to also refresh dropdowns
+      const originalReload = kbSearchInstance.reloadIndex.bind(kbSearchInstance);
+      kbSearchInstance.reloadIndex = async () => {
+        await originalReload();
+        repopulateDirDropdownsSafe();
+      };
+
+      // Local ops setup
+      if (isLocalMode) {
+        const panel = document.getElementById('localOpsPanel');
+        if (panel) panel.classList.remove('hidden');
+
+        const go = document.getElementById('btnGoNewMarkdown');
+        const back = document.getElementById('btnBackHome');
+        if (go) go.addEventListener('click', () => setView('viewNewMarkdown'));
+        if (back) back.addEventListener('click', () => setView('viewHome'));
+
+        const tplSel = document.getElementById('newPageTemplate');
+        const contentArea = document.getElementById('newPageContent');
+        if (tplSel && contentArea) {
+          contentArea.value = buildTemplate(tplSel.value);
+          tplSel.addEventListener('change', () => { contentArea.value = buildTemplate(tplSel.value); });
+        }
+
+        const btnCreate = document.getElementById('btnCreateFromPage');
+        if (btnCreate) {
+          btnCreate.addEventListener('click', async () => {
+            const directory = (document.getElementById('newPageDir').value || '').trim();
+            const filename = (document.getElementById('newPageFilename').value || '').trim();
+            const content = document.getElementById('newPageContent').value;
+            const status = document.getElementById('newPageStatus');
+
+            if (!directory || !filename) {
+              if (status) status.textContent = 'Directory and filename are required.';
+              return;
+            }
+
+            if (status) status.textContent = 'Creating...';
+            const response = await fetch('/api/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ directory, filename, content })
+            });
+            const result = await response.json().catch(() => null);
+
+            if (response.ok && result && result.success) {
+              if (status) status.textContent = `Created: ${result.filePath}`;
+              try { await kbSearchInstance.reloadIndex(); } catch { /* ignore */ }
+              setView('viewHome');
+            } else {
+              const msg = (result && result.error) ? result.error : `HTTP ${response.status}`;
+              if (status) status.textContent = 'Failed: ' + msg;
+            }
+          });
+        }
       }
     });
   </script>
